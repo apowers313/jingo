@@ -31,8 +31,10 @@ include mixins/links
                     button.btn.btn-primary(type="submit") Search
             .navbar-right
               if isAnonymous()
-                p.user You're not&nbsp;
-                  +anchor('/login?destination', 'logged in')#login(title='Access login page')
+                p.user Please&nbsp;
+                  +anchor('/login?destination', 'login')#login(title='Access login page')
+                  |&nbsp;or&nbsp;
+                  +anchor('/register', 'register')#register(title='Register new account')
               else
                 p.user
                   if user.email && user.email != 'jingouser'

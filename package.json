@@ -1,8 +1,9 @@
 {
   "name": "jingo",
   "version": "1.6.1",
-  "description": "A nodejs based wiki engine",
+  "description": "A demo of W3C WebAuthn / FIDO 2.0 based on Claudio Cicali's Jingo",
   "author": "Claudio Cicali <claudio.cicali@gmail.com>",
+  "contributor": "Adam Powers",
   "keywords": [
     "wiki",
     "git",

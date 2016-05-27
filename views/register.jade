@@ -1,0 +1,27 @@
+extends layout
+
+include mixins/form
+include mixins/links
+
+block content
+
+  #content
+
+    h2 Please register for an account
+
+    if (auth.webauthn.enabled)
+
+      mixin errors()
+
+      form.form-horizontal(action='#{proxyPath}/register', method='post')
+
+        .form-group
+          label.col-sm-2.control-label Username
+          .col-sm-3
+            input.form-control(type='text', autofocus, name='username')
+
+        .form-group
+          .col-sm-offset-2.col-sm-3
+            button.btn-primary.btn(type="submit") Register
+            |&nbsp;or&nbsp;
+            +anchor("/", 'Cancel')

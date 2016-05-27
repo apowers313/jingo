@@ -10,6 +10,7 @@ var auth = app.locals.config.get("authentication");
 var passport = app.locals.passport;
 var proxyPath = app.locals.config.getProxyPath();
 
+router.get("/register", _getRegister);
 router.get("/login", _getLogin);
 router.get("/logout", _getLogout);
 router.post("/login", passport.authenticate("local", {
@@ -189,6 +190,22 @@ function _getLogin(req, res) {
   res.locals.errors = req.flash();
 
   res.render("login", {
+    title: app.locals.config.get("application").title,
+    auth: auth
+  });
+}
+
+function _getRegister(req, res) {
+
+  req.session.destination = req.query.destination;
+
+  if (req.session.destination == "/register") {
+    req.session.destination = "/";
+  }
+
+  res.locals.errors = req.flash();
+
+  res.render("register", {
     title: app.locals.config.get("application").title,
     auth: auth
   });
