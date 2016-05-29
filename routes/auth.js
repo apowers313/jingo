@@ -4,19 +4,28 @@ var router = require("express").Router(),
   passportLocal = require("passport-local"),
   passportGoogle = require("passport-google-oauth"),
   passportGithub = require("passport-github").Strategy,
+  passportWebAuthn = require("passport-webauthn");
   tools = require("../lib/tools");
 
 var auth = app.locals.config.get("authentication");
 var passport = app.locals.passport;
 var proxyPath = app.locals.config.getProxyPath();
 
-router.get("/register", _getRegister);
 router.get("/login", _getLogin);
 router.get("/logout", _getLogout);
 router.post("/login", passport.authenticate("local", {
   successRedirect: proxyPath + "/auth/done",
   failureRedirect: proxyPath + "/login",
-  failureFlash: true 
+  failureFlash: true
+}));
+
+router.get("/register", _getRegister);
+
+router.post("/auth/webauthn/challenge", passport.authenticate("webauthn"));
+router.post("/auth/webauthn", passport.authenticate("webauthn", {
+  successRedirect: proxyPath + "/",
+  failureRedirect: proxyPath + "/login",
+  failureFlash: true
 }));
 router.get("/auth/done", _getAuthDone);
 
@@ -37,14 +46,14 @@ router.get("/auth/github/callback", passport.authenticate("github", {
 if (auth.google.enabled) {
   var redirectURL = auth.google.redirectURL || app.locals.baseUrl + "/oauth2callback";
   passport.use(new passportGoogle.OAuth2Strategy({
-    clientID: auth.google.clientId,
-    clientSecret: auth.google.clientSecret,
-    // I will leave the horrible name as the default to make the painful creation
-    // of the client id/secret simpler
-    callbackURL: redirectURL
-  },
+      clientID: auth.google.clientId,
+      clientSecret: auth.google.clientSecret,
+      // I will leave the horrible name as the default to make the painful creation
+      // of the client id/secret simpler
+      callbackURL: redirectURL
+    },
 
-    function (accessToken, refreshToken, profile, done) {
+    function(accessToken, refreshToken, profile, done) {
       usedAuthentication("google");
       done(null, profile);
     }
@@ -57,11 +66,11 @@ if (auth.github.enabled) {
   // Register a new Application with Github https://github.com/settings/applications/new
   // Authorization callback URL /auth/github/callback
   passport.use(new passportGithub({
-    clientID: auth.github.clientId,
-    clientSecret: auth.github.clientSecret,
-    callbackURL: redirectURL
-  },
-    function (accessToken, refreshToken, profile, done) {
+      clientID: auth.github.clientId,
+      clientSecret: auth.github.clientSecret,
+      callbackURL: redirectURL
+    },
+    function(accessToken, refreshToken, profile, done) {
       usedAuthentication("github");
       done(null, profile);
     }
@@ -114,6 +123,16 @@ if (auth.local.enabled) {
         displayName: foundUser.username,
         email: foundUser.email || ""
       });
+    }
+  ));
+}
+
+if (auth.webauthn.enabled) {
+  passport.use(new passportWebAuthn.Strategy(
+
+    function(username, credentialId, done) {
+      usedAuthentication("webauthn");
+      return done(null, username);
     }
   ));
 }
@@ -171,7 +190,7 @@ function _getAuthDone(req, res) {
     req.session = null;
     res.statusCode = 403;
     res.end("<h1>Forbidden</h1>");
-  }
+  } 
   else {
     var dst = req.session.destination || proxyPath + "/";
     delete req.session.destination;
@@ -200,10 +219,12 @@ function _getRegister(req, res) {
   req.session.destination = req.query.destination;
 
   if (req.session.destination == "/register") {
-    req.session.destination = "/";
+    req.session.destination = "/login";
   }
 
   res.locals.errors = req.flash();
+
+  // console.log("_getRegister: auth is:", auth);
 
   res.render("register", {
     title: app.locals.config.get("application").title,

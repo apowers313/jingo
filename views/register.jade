@@ -10,15 +10,16 @@ block content
     h2 Please register for an account
 
     if (auth.webauthn.enabled)
+      +asset("/js/rp-app.js")
 
       mixin errors()
 
-      form.form-horizontal(action='#{proxyPath}/register', method='post')
+      form.form-horizontal(onsubmit='fidoRegister()')
 
         .form-group
           label.col-sm-2.control-label Username
           .col-sm-3
-            input.form-control(type='text', autofocus, name='username')
+            input.form-control(type='text', autofocus, name='username', id='username')
 
         .form-group
           .col-sm-offset-2.col-sm-3
