@@ -1,9 +1,9 @@
 function getRegisterChallenge() {
     return new Promise(function(resolve, reject) {
         console.log("getRegisterChallenge");
-        var fidoAttestationChallengeEndpoint = "/auth/webauthn/challenge";
+        var fidoAttestationChallengeEndpoint = "/auth/webauthn/register";
         var challengeReq = {
-            username: document.getElementById("username").value,
+            username: document.getElementById("username").value, // TODO: check first
             op: "registerChallenge"
         };
         console.log("challengeReq", challengeReq);
@@ -32,7 +32,7 @@ function getRegisterChallenge() {
 function sendRegisterResponse(cred) {
     return new Promise(function(resolve, reject) {
         console.log("sendRegisterResponse");
-        var fidoServerRegisterEndpoint = "/auth/webauthn";
+        var fidoServerRegisterEndpoint = "/auth/webauthn/register";
         cred.op = "register";
 
         // send registration to server
@@ -52,10 +52,10 @@ function sendRegisterResponse(cred) {
             }
             console.log("done");
             // console.log (xhr.responseXML);
-            console.log (xhr.response);
+            console.log(xhr.response);
 
             // document.innerHtml = xhr.responseXML;
-            document.write (xhr.response);
+            document.write(xhr.response);
             document.close();
             // console.log("XMLHttpRequest.onload got response:");
             // console.log(xhr.response);
@@ -125,7 +125,7 @@ function fidoRegister() {
 function getLoginChallenge() {
     return new Promise(function(resolve, reject) {
         console.log("getLoginChallenge");
-        var fidoAssertionChallengeEndpoint = "/auth/webauthn/authChallenge";
+        var fidoAssertionChallengeEndpoint = "/auth/webauthn";
         var challengeReq = {
             username: document.getElementById("username").value,
             op: "authChallenge"
@@ -170,15 +170,19 @@ function sendLoginResponse(assn) {
         xhr.send(a);
         xhr.onload = function() {
             console.log("XMLHttpRequest.onload got response for login:");
-            console.log(xhr.response);
-            var elem = document.getElementById("success");
-            if (xhr.status != 200) {
-                console.log("Status:", xhr.status);
-                var errorMsg = JSON.parse(xhr.response).error;
-                elem.innerHTML = "Error logging in: " + errorMsg;
-            } else {
-                elem.innerHTML = "Successful login! Normally I'd send you to your homepage, but this is a fake website...";
+            if (xhr.status !== 200) {
+                console.log("ERROR");
+                console.log(xhr.status);
+                console.log(xhr.response);
+                return;
             }
+            console.log("done");
+            // console.log (xhr.responseXML);
+            console.log(xhr.response);
+
+            // document.innerHtml = xhr.responseXML;
+            document.write(xhr.response);
+            document.close();
         };
     });
 }
@@ -213,7 +217,7 @@ function fidoLogin() {
             };
             console.log("getAssertion done, got:");
             console.log(assn);
-            assn.username = document.getElementById("userDisplayName").value;
+            assn.username = document.getElementById("username").value; // TODO: check first
             return assn;
         })
         .then(function(assn) {

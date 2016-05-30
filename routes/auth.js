@@ -21,7 +21,6 @@ router.post("/login", passport.authenticate("local", {
 
 router.get("/register", _getRegister);
 
-router.post("/auth/webauthn/challenge", passport.authenticate("webauthn"));
 router.post("/auth/webauthn", passport.authenticate("webauthn", {
   successRedirect: proxyPath + "/",
   failureRedirect: proxyPath + "/login",
@@ -128,13 +127,20 @@ if (auth.local.enabled) {
 }
 
 if (auth.webauthn.enabled) {
-  passport.use(new passportWebAuthn.Strategy(
-
+  var wa = new passportWebAuthn.Strategy(
     function(username, credentialId, done) {
       usedAuthentication("webauthn");
       return done(null, username);
     }
-  ));
+  );
+
+  // mount routes for managing registration
+  router.post("/auth/webauthn/register", wa.register({
+    successRedirect: proxyPath + "/login",
+    failureRedirect: proxyPath + "/register",
+    failureFlash: true
+  }));
+  passport.use(wa);
 }
 
 function usedAuthentication(name) {
@@ -190,7 +196,7 @@ function _getAuthDone(req, res) {
     req.session = null;
     res.statusCode = 403;
     res.end("<h1>Forbidden</h1>");
-  } 
+  package.json} 
   else {
     var dst = req.session.destination || proxyPath + "/";
     delete req.session.destination;
