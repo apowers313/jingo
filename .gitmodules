@@ -1,0 +1,6 @@
+[submodule "public/js/webauthn-polyfill"]
+	path = public/js/webauthn-polyfill
+	url = https://github.com/apowers313/webauthn-polyfill.git
+[submodule "public/js/webauthn-soft-authn"]
+	path = public/js/webauthn-soft-authn
+	url = https://github.com/apowers313/webauthn-soft-authn.git
